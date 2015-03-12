@@ -2,31 +2,28 @@ package csv_classes;
 
 import java.util.Date;
 
-public class Course {
+public class LabQueueStaff {
 	private int id;
-	private String courseName;
-	private String term;
-	private int status;
 	private Date createdAt;
 	private Date updatedAt;
 	private Date deletedAt;
+	private int userId;
+	private int labQueueId;
 	
-	public Course(int id, String courseName, String term, int status, Date createdAt, Date updatedAt, Date deletedAt) {
+	public LabQueueStaff(int id, Date createdAt, Date updatedAt, Date deletedAt, int userId, int labQueueId) {
 		this.id = id;
-		this.courseName = courseName;
-		this.term = term;
-		this.status = status;
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
 		this.deletedAt = deletedAt;
+		this.userId = userId;
+		this.labQueueId = labQueueId;
 	}
 	
 	public int getId() { return id; }
-	public String getCourseName() { return courseName; }
-	public String getTerm() { return term; }
-	public int getStatus() { return status; }
 	public Date getCreatedAt() { return createdAt; }
 	public Date getUpdatedAt() { return updatedAt; }
 	public Date getDeletedAt() { return deletedAt; }
+	public int getUserId() { return userId; }
+	public int getLabQueueId() { return labQueueId; }
 	
 }

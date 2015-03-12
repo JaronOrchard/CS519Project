@@ -1,59 +1,45 @@
 package chara_subsetter;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import csv_classes.Course;
+import csv_classes.GradeFa13;
+import csv_classes.GradeFa14;
+import csv_classes.LabQueue;
+import csv_classes.LabQueueStaff;
+import csv_classes.QueueEntry;
+import csv_classes.StaffAssignment;
+import csv_classes.User;
 
 public class CharaSubsetter {
 	
 	List<Course> courses;
+	List<QueueEntry> queueEntries;
+	List<LabQueueStaff> labQueueStaffs;
+	List<LabQueue> labQueues;
+	List<StaffAssignment> staffAssignments;
+	List<User> users;
+	List<GradeFa13> gradesFa13;
+	List<GradeFa14> gradesFa14;
+	
+	public CharaSubsetter() {
+		courses = new ArrayList<Course>();
+		queueEntries = new ArrayList<QueueEntry>();
+		labQueueStaffs = new ArrayList<LabQueueStaff>();
+		labQueues = new ArrayList<LabQueue>();
+		staffAssignments = new ArrayList<StaffAssignment>();
+		users = new ArrayList<User>();
+		gradesFa13 = new ArrayList<GradeFa13>();
+		gradesFa14 = new ArrayList<GradeFa14>();
+	}
 	
 	public void run() {
-		System.out.print("Loading...");
+		CSVLoader.loadCSVs(courses, queueEntries, labQueueStaffs, labQueues, staffAssignments, users, gradesFa13, gradesFa14);
 		
-		File dataDir = new File("../Data");
-		loadCourses(new File(dataDir, "courses.csv"));
 		
-		System.out.println("done.");
 	}
 	
-	private void loadCourses(File coursesFile) {
-		courses = new ArrayList<Course>();
-		DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
-		
-		BufferedReader br = null;
-		try {
-			br = new BufferedReader(new FileReader(coursesFile));
-			br.readLine(); // Skip top line
-			String line = br.readLine();
-			while (line != null) {
-				String[] tokens = line.split(",");
-				courses.add(new Course(
-						Integer.valueOf(tokens[0]),
-						tokens[1],
-						tokens[2],
-						Integer.valueOf(tokens[3]),
-						(tokens[4].equals("NULL") ? null : dateFormatter.parse(tokens[4])),
-						(tokens[5].equals("NULL") ? null : dateFormatter.parse(tokens[5])),
-						(tokens[6].equals("NULL") ? null : dateFormatter.parse(tokens[6]))
-						));
-				line = br.readLine();
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				br.close();
-			} catch (IOException e) { }
-		}
-	}
+	
 	
 }
