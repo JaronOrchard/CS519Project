@@ -1,0 +1,4 @@
+Put data files in this directory for CharaSubsetter's use.
+
+(This file must exist because git does not save empty directories,
+ and the real data can't go in the repo due to privacy concerns.)
