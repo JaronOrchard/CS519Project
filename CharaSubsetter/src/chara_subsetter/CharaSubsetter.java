@@ -1,7 +1,10 @@
 package chara_subsetter;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import csv_classes.Course;
 import csv_classes.GradeFa13;
@@ -37,9 +40,31 @@ public class CharaSubsetter {
 	public void run() {
 		CSVLoader.loadCSVs(courses, queueEntries, labQueueStaffs, labQueues, staffAssignments, users, gradesFa13, gradesFa14);
 		
+		System.out.println("# of QueueEntries: " + queueEntries.size());
+		dropNonCS225Entries();
+		System.out.println("Removed non-CS 225 entries.");
+		Queries.reportMostActiveTAs(queueEntries);
+		System.out.println("# of QueueEntries: " + queueEntries.size());
 		
 	}
 	
-	
+	/**
+	 * Removes any QueueEntries that didn't take place in CS 225 Fall 2013 or Fall 2014.
+	 */
+	private void dropNonCS225Entries() {
+		Set<Integer> validQueueIds = new HashSet<Integer>();
+		for (LabQueue labQueue : labQueues) {
+			if (labQueue.getCourseId() == 4 || labQueue.getCourseId() == 11) {
+				validQueueIds.add(labQueue.getId());
+			}
+		}
+		Iterator<QueueEntry> queueEntryIter = queueEntries.iterator();
+		while (queueEntryIter.hasNext()) {
+			QueueEntry queueEntry = queueEntryIter.next();
+			if (!validQueueIds.contains(queueEntry.getLabQueueId())) {
+				queueEntryIter.remove();
+			}
+		}
+	}
 	
 }

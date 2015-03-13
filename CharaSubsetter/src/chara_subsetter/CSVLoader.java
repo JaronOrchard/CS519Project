@@ -55,7 +55,6 @@ public class CSVLoader {
 		loadGradesFa13(gradesFa13);
 		loadGradesFa14(gradesFa14);
 		System.out.println("done.");
-		
 	}
 	
 	private static void loadCourses(List<Course> courses) {
