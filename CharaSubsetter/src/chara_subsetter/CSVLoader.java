@@ -45,7 +45,6 @@ public class CSVLoader {
 			List<LabQueueStaff> labQueueStaffs, List<LabQueue> labQueues,
 			List<StaffAssignment> staffAssignments, List<User> users,
 			List<GradeFa13> gradesFa13, List<GradeFa14> gradesFa14) {
-		System.out.print("Loading CSV files...");
 		loadCourses(courses);
 		loadQueueEntries(queueEntries);
 		loadLabQueueStaffs(labQueueStaffs);
@@ -54,7 +53,6 @@ public class CSVLoader {
 		loadUsers(users);
 		loadGradesFa13(gradesFa13);
 		loadGradesFa14(gradesFa14);
-		System.out.println("done.");
 	}
 	
 	private static void loadCourses(List<Course> courses) {

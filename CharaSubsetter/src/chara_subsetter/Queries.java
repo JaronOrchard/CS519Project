@@ -1,11 +1,17 @@
 package chara_subsetter;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
+import csv_classes.GradeFa13;
+import csv_classes.GradeFa14;
 import csv_classes.QueueEntry;
+import csv_classes.User;
 
 public class Queries {
 	
@@ -40,6 +46,62 @@ public class Queries {
 			mostActiveTAs.remove(answererId);
 		}
 		System.out.println("");
+	}
+	
+	/**
+	 * Returns a map of NetIDs and final grades of all students who completed CS 225 in Fall 2013.
+	 */
+	public static Map<String, Double> getCS225Fa13Students(List<GradeFa13> grades) {
+		Map<String, Double> students = new HashMap<String, Double>();
+		for (GradeFa13 grade : grades) {
+			if (grade.getTotal() != 0) {
+				students.put(grade.getNetId(), grade.getTotal());
+			}
+		}
+		return students;
+	}
+
+	/**
+	 * Returns a map of NetIDs and final grades of all students who completed CS 225 in Fall 2014.
+	 */
+	public static Map<String, Double> getCS225Fa14Students(List<GradeFa14> grades) {
+		Map<String, Double> students = new HashMap<String, Double>();
+		for (GradeFa14 grade : grades) {
+			if (grade.getTotal() != 0) {
+				students.put(grade.getNetId(), grade.getTotal());
+			}
+		}
+		return students;
+	}
+	
+	/**
+	 * Given a set of student netIds, returns the number of times they
+	 * had a question answered on the Chara queue.
+	 */
+	public static Map<String, Integer> getNumberOfAnsweredQuestions(Set<String> studentNetIds, List<QueueEntry> queueEntries, List<User> users) {
+		Map<String, Integer> count = new HashMap<String, Integer>();
+		for (String studentNetId : studentNetIds) {
+			int userId = -1;
+			for (User user : users) {
+				if (user.getNetId().equals(studentNetId)) {
+					userId = user.getId();
+					break;
+				}
+			}
+			if (userId == -1) {
+				// Could not find user id--this person never used the queue.
+				count.put(studentNetId, 0);
+				continue;
+			}
+			int questionsAnswered = 0;
+			for (QueueEntry queueEntry : queueEntries) {
+				if (queueEntry.getAskerId() == userId && queueEntry.getAnswererId() != -1) {
+					questionsAnswered++;
+				}
+			}
+			count.put(studentNetId, questionsAnswered);
+		}
+		return count;
 	}
 	
 }
