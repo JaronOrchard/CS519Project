@@ -1,8 +1,6 @@
 package chara_subsetter;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -54,7 +52,7 @@ public class Queries {
 	public static Map<String, Double> getCS225Fa13Students(List<GradeFa13> grades) {
 		Map<String, Double> students = new HashMap<String, Double>();
 		for (GradeFa13 grade : grades) {
-			if (grade.getTotal() != 0) {
+			if (grade.getFinalExam() != -1) {
 				students.put(grade.getNetId(), grade.getTotal());
 			}
 		}
@@ -67,7 +65,7 @@ public class Queries {
 	public static Map<String, Double> getCS225Fa14Students(List<GradeFa14> grades) {
 		Map<String, Double> students = new HashMap<String, Double>();
 		for (GradeFa14 grade : grades) {
-			if (grade.getTotal() != 0) {
+			if (grade.getFinalExam() != -1) {
 				students.put(grade.getNetId(), grade.getTotal());
 			}
 		}
