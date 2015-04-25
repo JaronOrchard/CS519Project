@@ -40,4 +40,6 @@ public class QueueEntry {
 	public Date getEvaluationCreatedAt() { return evaluationCreatedAt; }
 	public Date getEvaluationDeletedAt() { return evaluationDeletedAt; }
 	
+	public boolean wasAnswered() { return answererId != -1 && evaluationCreatedAt != null; }
+	
 }

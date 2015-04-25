@@ -49,7 +49,7 @@ public class Queries {
 	/**
 	 * Returns a map of NetIDs and final grades of all students who completed CS 225 in Fall 2013.
 	 */
-	public static Map<String, Double> getCS225Fa13Students(List<GradeFa13> grades) {
+	public static Map<String, Double> getCS225Fa13CompletedStudents(List<GradeFa13> grades) {
 		Map<String, Double> students = new HashMap<String, Double>();
 		for (GradeFa13 grade : grades) {
 			if (grade.getFinalExam() != -1) {
@@ -58,11 +58,11 @@ public class Queries {
 		}
 		return students;
 	}
-
+	
 	/**
 	 * Returns a map of NetIDs and final grades of all students who completed CS 225 in Fall 2014.
 	 */
-	public static Map<String, Double> getCS225Fa14Students(List<GradeFa14> grades) {
+	public static Map<String, Double> getCS225Fa14CompletedStudents(List<GradeFa14> grades) {
 		Map<String, Double> students = new HashMap<String, Double>();
 		for (GradeFa14 grade : grades) {
 			if (grade.getFinalExam() != -1) {

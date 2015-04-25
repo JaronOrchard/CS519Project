@@ -1,12 +1,15 @@
 package chara_subsetter;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import mega_classes.MegaStudent;
 import csv_classes.Course;
 import csv_classes.GradeFa13;
 import csv_classes.GradeFa14;
@@ -18,6 +21,9 @@ import csv_classes.User;
 
 public class CharaSubsetter {
 	
+	final long CS225_FA14_MT1_TIME = 1412103600; // Unix timestamp of CS 225 Fall 2014's midterm 1 (9/30/2014)
+	final long CS225_FA14_MT2_TIME = 1415127600; // Unix timestamp of CS 225 Fall 2014's midterm 2 (11/4/2014)
+	
 	List<Course> courses;
 	List<QueueEntry> queueEntries;
 	List<LabQueueStaff> labQueueStaffs;
@@ -26,6 +32,8 @@ public class CharaSubsetter {
 	List<User> users;
 	List<GradeFa13> gradesFa13;
 	List<GradeFa14> gradesFa14;
+	Map<Integer, String> userIdToNetIdMap;
+	Map<String, Integer> userNetIdToIdMap;
 	
 	public CharaSubsetter() {
 		courses = new ArrayList<Course>();
@@ -36,14 +44,57 @@ public class CharaSubsetter {
 		users = new ArrayList<User>();
 		gradesFa13 = new ArrayList<GradeFa13>();
 		gradesFa14 = new ArrayList<GradeFa14>();
+		userIdToNetIdMap = new HashMap<Integer, String>();
+		userNetIdToIdMap = new HashMap<String, Integer>();
+		// Load/populate data:
+		CSVLoader.loadCSVs(courses, queueEntries, labQueueStaffs, labQueues, staffAssignments, users, gradesFa13, gradesFa14);
+		for (User user : users) {
+			userIdToNetIdMap.put(user.getId(), user.getNetId());
+			userNetIdToIdMap.put(user.getNetId(), user.getId());
+		}
+	}
+	
+	/**
+	 * @return A mapping of student IDs to their populated MegaStudent objects.
+	 */
+	private Collection<MegaStudent> getMegaStudentsFa14() {
+		Map<Integer, MegaStudent> megaStudentsFa14Map = new HashMap<Integer, MegaStudent>();
+		int idForStudentsWhoNeverUsedChara = 100000; // Increments over time
+		// Populate map with one MegaStudent object for each student...
+		for (GradeFa14 grade : gradesFa14) {
+			int studentId = (userNetIdToIdMap.get(grade.getNetId()) == null ? idForStudentsWhoNeverUsedChara++ : userNetIdToIdMap.get(grade.getNetId()));
+			MegaStudent megaStudent = new MegaStudent(studentId, grade.getNetId(), grade.getMt1(), grade.getMt2(), grade.getFinalExam(), grade.getTotal());
+			megaStudentsFa14Map.put(studentId, megaStudent);
+		}
+		// For each answered QueueEntry, add it to the appropriate MegaStudent object
+		List<QueueEntry> queueEntries = getCS225Fa14QueueEntries();
+		for (QueueEntry queueEntry : queueEntries) {
+			if (queueEntry.wasAnswered() && megaStudentsFa14Map.containsKey(queueEntry.getAskerId())) {
+				if (queueEntry.getEvaluationCreatedAt().getTime() < CS225_FA14_MT1_TIME) {
+					megaStudentsFa14Map.get(queueEntry.getAskerId()).addPreMt1Answer(queueEntry.getAnswererId());
+				} else if (queueEntry.getEvaluationCreatedAt().getTime() < CS225_FA14_MT2_TIME) {
+					megaStudentsFa14Map.get(queueEntry.getAskerId()).addMt1ToMt2Answer(queueEntry.getAnswererId());
+				} else {
+					megaStudentsFa14Map.get(queueEntry.getAskerId()).addMt2ToFinalAnswer(queueEntry.getAnswererId());
+				}
+			}
+		}
+		// For each MegaStudent, finalize its answered question count
+		for (MegaStudent megaStudent : megaStudentsFa14Map.values()) { megaStudent.finalizeTotalQuestionsAnswered(); }
+		// Return collection of MegaStudent objects
+		return megaStudentsFa14Map.values();
 	}
 	
 	public void run() {
-		CSVLoader.loadCSVs(courses, queueEntries, labQueueStaffs, labQueues, staffAssignments, users, gradesFa13, gradesFa14);
-		dropNonCS225Entries();
+		Collection<MegaStudent> megaStudentsFa14 = getMegaStudentsFa14();
+		int totalAnsweredFa14 = 0;
+		for (MegaStudent megaStudent : megaStudentsFa14) { totalAnsweredFa14 += megaStudent.getTotalQuestionsAnswered(); }
+		System.out.println("In Fall 2014, " + megaStudentsFa14.size() + " students got " + totalAnsweredFa14 + " questions answered");
 		
-		Map<String, Double> studentsFa13 = Queries.getCS225Fa13Students(gradesFa13);
-		Map<String, Double> studentsFa14 = Queries.getCS225Fa14Students(gradesFa14);
+		// Prints a CSV of number of questions a student had answered to his/her overall course score:
+		/*dropNonCS225Entries();
+		Map<String, Double> studentsFa13 = Queries.getCS225Fa13CompletedStudents(gradesFa13);
+		Map<String, Double> studentsFa14 = Queries.getCS225Fa14CompletedStudents(gradesFa14);
 		Set<String> studentNetIds = new HashSet<String>();
 		for (String student : studentsFa13.keySet()) { studentNetIds.add(student); }
 		for (String student : studentsFa14.keySet()) { studentNetIds.add(student); }
@@ -53,9 +104,9 @@ public class CharaSubsetter {
 		}
 		for (String student : studentsFa14.keySet()) {
 			System.out.println(student + "," + answeredQuestions.get(student) + "," + studentsFa14.get(student));  
-		}
+		}*/
 		
-		
+		// Early test
 		/*
 		System.out.println("# of QueueEntries: " + queueEntries.size());
 		dropNonCS225Entries();
@@ -82,6 +133,44 @@ public class CharaSubsetter {
 				queueEntryIter.remove();
 			}
 		}
+	}
+	
+	/**
+	 * @return The subset of {@link QueueEntries} that only pertains to CS 225 Fall 2013.
+	 */
+	public List<QueueEntry> getCS225Fa13QueueEntries() {
+		Set<Integer> validQueueIds = new HashSet<Integer>();
+		for (LabQueue labQueue : labQueues) {
+			if (labQueue.getCourseId() == 4) {
+				validQueueIds.add(labQueue.getId());
+			}
+		}
+		List<QueueEntry> queueEntriesFa13 = new ArrayList<QueueEntry>();
+		for (QueueEntry queueEntry : queueEntries) {
+			if (validQueueIds.contains(queueEntry.getLabQueueId())) {
+				queueEntriesFa13.add(queueEntry);
+			}
+		}
+		return queueEntriesFa13;
+	}
+	
+	/**
+	 * @return The subset of {@link QueueEntries} that only pertains to CS 225 Fall 2014.
+	 */
+	public List<QueueEntry> getCS225Fa14QueueEntries() {
+		Set<Integer> validQueueIds = new HashSet<Integer>();
+		for (LabQueue labQueue : labQueues) {
+			if (labQueue.getCourseId() == 11) {
+				validQueueIds.add(labQueue.getId());
+			}
+		}
+		List<QueueEntry> queueEntriesFa14 = new ArrayList<QueueEntry>();
+		for (QueueEntry queueEntry : queueEntries) {
+			if (validQueueIds.contains(queueEntry.getLabQueueId())) {
+				queueEntriesFa14.add(queueEntry);
+			}
+		}
+		return queueEntriesFa14;
 	}
 	
 }
