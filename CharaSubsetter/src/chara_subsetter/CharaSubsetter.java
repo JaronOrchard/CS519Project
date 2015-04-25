@@ -21,8 +21,11 @@ import csv_classes.User;
 
 public class CharaSubsetter {
 	
-	final long CS225_FA14_MT1_TIME = 1412103600; // Unix timestamp of CS 225 Fall 2014's midterm 1 (9/30/2014)
-	final long CS225_FA14_MT2_TIME = 1415127600; // Unix timestamp of CS 225 Fall 2014's midterm 2 (11/4/2014)
+	final long CS225_FA13_MT1_TIME = 1380654000000L; // Unix timestamp of CS 225 Fall 2013's midterm 1 (10/1/2013)
+	final long CS225_FA13_MT2_TIME = 1383678000000L; // Unix timestamp of CS 225 Fall 2013's midterm 2 (11/5/2014)
+	
+	final long CS225_FA14_MT1_TIME = 1412103600000L; // Unix timestamp of CS 225 Fall 2014's midterm 1 (9/30/2014)
+	final long CS225_FA14_MT2_TIME = 1415127600000L; // Unix timestamp of CS 225 Fall 2014's midterm 2 (11/4/2014)
 	
 	List<Course> courses;
 	List<QueueEntry> queueEntries;
@@ -57,6 +60,37 @@ public class CharaSubsetter {
 	/**
 	 * @return A mapping of student IDs to their populated MegaStudent objects.
 	 */
+	private Collection<MegaStudent> getMegaStudentsFa13() {
+		Map<Integer, MegaStudent> megaStudentsFa13Map = new HashMap<Integer, MegaStudent>();
+		int idForStudentsWhoNeverUsedChara = 100000; // Increments over time
+		// Populate map with one MegaStudent object for each student...
+		for (GradeFa13 grade : gradesFa13) {
+			int studentId = (userNetIdToIdMap.get(grade.getNetId()) == null ? idForStudentsWhoNeverUsedChara++ : userNetIdToIdMap.get(grade.getNetId()));
+			MegaStudent megaStudent = new MegaStudent(studentId, grade.getNetId(), grade.getMt1(), grade.getMt2(), grade.getFinalExam(), grade.getTotal());
+			megaStudentsFa13Map.put(studentId, megaStudent);
+		}
+		// For each answered QueueEntry, add it to the appropriate MegaStudent object
+		List<QueueEntry> queueEntries = getCS225Fa13QueueEntries();
+		for (QueueEntry queueEntry : queueEntries) {
+			if (queueEntry.wasAnswered() && megaStudentsFa13Map.containsKey(queueEntry.getAskerId())) {
+				if (queueEntry.getEvaluationCreatedAt().getTime() < CS225_FA13_MT1_TIME) {
+					megaStudentsFa13Map.get(queueEntry.getAskerId()).addPreMt1Answer(queueEntry.getAnswererId());
+				} else if (queueEntry.getEvaluationCreatedAt().getTime() < CS225_FA13_MT2_TIME) {
+					megaStudentsFa13Map.get(queueEntry.getAskerId()).addMt1ToMt2Answer(queueEntry.getAnswererId());
+				} else {
+					megaStudentsFa13Map.get(queueEntry.getAskerId()).addMt2ToFinalAnswer(queueEntry.getAnswererId());
+				}
+			}
+		}
+		// For each MegaStudent, finalize its answered question count
+		for (MegaStudent megaStudent : megaStudentsFa13Map.values()) { megaStudent.finalizeTotalQuestionsAnswered(); }
+		// Return collection of MegaStudent objects
+		return megaStudentsFa13Map.values();
+	}
+	
+	/**
+	 * @return A mapping of student IDs to their populated MegaStudent objects.
+	 */
 	private Collection<MegaStudent> getMegaStudentsFa14() {
 		Map<Integer, MegaStudent> megaStudentsFa14Map = new HashMap<Integer, MegaStudent>();
 		int idForStudentsWhoNeverUsedChara = 100000; // Increments over time
@@ -85,11 +119,18 @@ public class CharaSubsetter {
 		return megaStudentsFa14Map.values();
 	}
 	
+	private void printMegaStudentsCSV(Collection<MegaStudent> megaStudents) {
+		System.out.println("id,grade_mt1,grade_mt2,grade_final,grade_overall,questions_pre_mt1,questions_mt1_to_mt2,questions_mt2_to_final,questions_total");
+		for (MegaStudent megaStudent : megaStudents) {
+			System.out.println(megaStudent.getId() + "," + megaStudent.getMt1Grade() + "," + megaStudent.getMt2Grade() + "," +
+					megaStudent.getFinalExamGrade() + "," + megaStudent.getOverallGrade() + "," + megaStudent.getQuestionsAnsweredPreMt1() + "," +
+					megaStudent.getQuestionsAnsweredMt1ToMt2() + "," + megaStudent.getQuestionsAnsweredMt2ToFinal() + "," +
+					megaStudent.getTotalQuestionsAnswered());
+		}
+	}
+	
 	public void run() {
-		Collection<MegaStudent> megaStudentsFa14 = getMegaStudentsFa14();
-		int totalAnsweredFa14 = 0;
-		for (MegaStudent megaStudent : megaStudentsFa14) { totalAnsweredFa14 += megaStudent.getTotalQuestionsAnswered(); }
-		System.out.println("In Fall 2014, " + megaStudentsFa14.size() + " students got " + totalAnsweredFa14 + " questions answered");
+		printMegaStudentsCSV(getMegaStudentsFa13());
 		
 		// Prints a CSV of number of questions a student had answered to his/her overall course score:
 		/*dropNonCS225Entries();

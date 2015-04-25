@@ -10,6 +10,9 @@ public class MegaStudent {
 	private Map<Integer, Integer> preMt1Answers; // Map of TA who answered a question to number of questions answered by that TA
 	private Map<Integer, Integer> mt1ToMt2Answers;
 	private Map<Integer, Integer> mt2ToFinalAnswers;
+	private int questionsAnsweredPreMt1;
+	private int questionsAnsweredMt1ToMt2;
+	private int questionsAnsweredMt2ToFinal;
 	private int totalQuestionsAnswered; // Total of all 3 maps
 	private double mt1Grade;
 	private double mt2Grade;
@@ -33,6 +36,9 @@ public class MegaStudent {
 	public Map<Integer, Integer> getPreMt1Answers() { return preMt1Answers; }
 	public Map<Integer, Integer> getMt1ToMt2Answers() { return mt1ToMt2Answers; }
 	public Map<Integer, Integer> getMt2ToFinalAnswers() { return mt2ToFinalAnswers; }
+	public int getQuestionsAnsweredPreMt1() { return questionsAnsweredPreMt1; }
+	public int getQuestionsAnsweredMt1ToMt2() { return questionsAnsweredMt1ToMt2; }
+	public int getQuestionsAnsweredMt2ToFinal() { return questionsAnsweredMt2ToFinal; }
 	public int getTotalQuestionsAnswered() { return totalQuestionsAnswered; }
 	public double getMt1Grade() { return mt1Grade; }
 	public double getMt2Grade() { return mt2Grade; }
@@ -64,11 +70,13 @@ public class MegaStudent {
 	}
 	
 	public void finalizeTotalQuestionsAnswered() {
-		int count = 0;
-		for (Integer i : preMt1Answers.values()) { count += i; }
-		for (Integer i : mt1ToMt2Answers.values()) { count += i; }
-		for (Integer i : mt2ToFinalAnswers.values()) { count += i; }
-		totalQuestionsAnswered = count;
+		questionsAnsweredPreMt1 = 0;
+		questionsAnsweredMt1ToMt2 = 0;
+		questionsAnsweredMt2ToFinal = 0;
+		for (Integer i : preMt1Answers.values()) { questionsAnsweredPreMt1 += i; }
+		for (Integer i : mt1ToMt2Answers.values()) { questionsAnsweredMt1ToMt2 += i; }
+		for (Integer i : mt2ToFinalAnswers.values()) { questionsAnsweredMt2ToFinal += i; }
+		totalQuestionsAnswered = questionsAnsweredPreMt1 + questionsAnsweredMt1ToMt2 + questionsAnsweredMt2ToFinal;
 	}
 	
 }
