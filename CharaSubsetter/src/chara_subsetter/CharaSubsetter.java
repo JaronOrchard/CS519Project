@@ -129,8 +129,47 @@ public class CharaSubsetter {
 		}
 	}
 	
+	private void printApplicableQueueEntriesFa13() {
+		Set<Integer> studentIds = new HashSet<Integer>();
+		for (GradeFa13 grade : gradesFa13) {
+			Integer studentId = (userNetIdToIdMap.get(grade.getNetId()));
+			if (studentId != null) {
+				studentIds.add(studentId);
+			}
+		}
+		List<QueueEntry> queueEntries = getCS225Fa13QueueEntries();
+		System.out.println("student_id,ta_id,question_asked_time,question_answered_time");
+		for (QueueEntry queueEntry : queueEntries) {
+			if (queueEntry.getEvaluationCreatedAt() != null && queueEntry.getAnswererId() != -1 &&
+					queueEntry.getQuestionCreatedAt() != null && studentIds.contains(queueEntry.getAskerId())) {
+				System.out.println(queueEntry.getAskerId() + "," + queueEntry.getAnswererId() + "," +
+						queueEntry.getQuestionCreatedAt().getTime() + "," + queueEntry.getEvaluationCreatedAt().getTime());
+			}
+		}
+	}
+	
+	private void printApplicableQueueEntriesFa14() {
+		Set<Integer> studentIds = new HashSet<Integer>();
+		for (GradeFa14 grade : gradesFa14) {
+			Integer studentId = (userNetIdToIdMap.get(grade.getNetId()));
+			if (studentId != null) {
+				studentIds.add(studentId);
+			}
+		}
+		List<QueueEntry> queueEntries = getCS225Fa14QueueEntries();
+		System.out.println("student_id,ta_id,question_asked_time,question_answered_time");
+		for (QueueEntry queueEntry : queueEntries) {
+			if (queueEntry.getEvaluationCreatedAt() != null && queueEntry.getAnswererId() != -1 &&
+					queueEntry.getQuestionCreatedAt() != null && studentIds.contains(queueEntry.getAskerId())) {
+				System.out.println(queueEntry.getAskerId() + "," + queueEntry.getAnswererId() + "," +
+						queueEntry.getQuestionCreatedAt().getTime() + "," + queueEntry.getEvaluationCreatedAt().getTime());
+			}
+		}
+	}
+	
 	public void run() {
-		printMegaStudentsCSV(getMegaStudentsFa13());
+		printApplicableQueueEntriesFa13();
+		//printMegaStudentsCSV(getMegaStudentsFa14());
 		
 		// Prints a CSV of number of questions a student had answered to his/her overall course score:
 		/*dropNonCS225Entries();
