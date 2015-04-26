@@ -168,7 +168,7 @@ public class CharaSubsetter {
 	}
 	
 	public void run() {
-		printApplicableQueueEntriesFa13();
+		printApplicableQueueEntriesFa14();
 		//printMegaStudentsCSV(getMegaStudentsFa14());
 		
 		// Prints a CSV of number of questions a student had answered to his/her overall course score:
@@ -202,7 +202,7 @@ public class CharaSubsetter {
 	public void dropNonCS225Entries() {
 		Set<Integer> validQueueIds = new HashSet<Integer>();
 		for (LabQueue labQueue : labQueues) {
-			if (labQueue.getCourseId() == 4 || labQueue.getCourseId() == 11) {
+			if ((labQueue.getCourseId() == 4 || labQueue.getCourseId() == 11) && !labQueue.getName().toLowerCase().contains("music")) {
 				validQueueIds.add(labQueue.getId());
 			}
 		}
@@ -221,7 +221,7 @@ public class CharaSubsetter {
 	public List<QueueEntry> getCS225Fa13QueueEntries() {
 		Set<Integer> validQueueIds = new HashSet<Integer>();
 		for (LabQueue labQueue : labQueues) {
-			if (labQueue.getCourseId() == 4) {
+			if (labQueue.getCourseId() == 4 && !labQueue.getName().toLowerCase().contains("music")) {
 				validQueueIds.add(labQueue.getId());
 			}
 		}
@@ -240,7 +240,7 @@ public class CharaSubsetter {
 	public List<QueueEntry> getCS225Fa14QueueEntries() {
 		Set<Integer> validQueueIds = new HashSet<Integer>();
 		for (LabQueue labQueue : labQueues) {
-			if (labQueue.getCourseId() == 11) {
+			if (labQueue.getCourseId() == 11 && !labQueue.getName().toLowerCase().contains("music")) {
 				validQueueIds.add(labQueue.getId());
 			}
 		}
