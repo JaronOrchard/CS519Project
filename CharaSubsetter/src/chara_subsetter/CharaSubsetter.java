@@ -2,6 +2,7 @@ package chara_subsetter;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -167,9 +168,27 @@ public class CharaSubsetter {
 		}
 	}
 	
+	private void printStaffListCSV() {
+		List<QueueEntry> queueEntries13 = getCS225Fa13QueueEntries();
+		List<QueueEntry> queueEntries14 = getCS225Fa14QueueEntries();
+		Set<Integer> allTAsSet = new HashSet<Integer>();
+		for (QueueEntry queueEntry : queueEntries13) { allTAsSet.add(queueEntry.getAnswererId()); }
+		for (QueueEntry queueEntry : queueEntries14) { allTAsSet.add(queueEntry.getAnswererId()); }
+		allTAsSet.remove(-1);
+		List<Integer> allTAsList = new ArrayList<Integer>(allTAsSet);
+		Collections.sort(allTAsList);
+		System.out.println("ta_id,ta_name");
+		int count = 1;
+		for (Integer ta_id : allTAsList) {
+			System.out.println(ta_id + ",Staff " + count);
+			count++;
+		}
+	}
+	
 	public void run() {
-		printApplicableQueueEntriesFa14();
+		//printApplicableQueueEntriesFa14();
 		//printMegaStudentsCSV(getMegaStudentsFa14());
+		printStaffListCSV();
 		
 		// Prints a CSV of number of questions a student had answered to his/her overall course score:
 		/*dropNonCS225Entries();
