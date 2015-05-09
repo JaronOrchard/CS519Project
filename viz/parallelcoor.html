@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>D3 Test</title>
+        <script type="text/javascript" src="d3.js"></script>
+		<style type="text/css">
+			.axis path,
+			.axis line {
+				fill: none;
+				stroke: black;
+				shape-rendering: crispEdges;
+			}
+
+			.axis text {
+				font-family: sans-serif;
+				font-size: 11px;
+			}		
+		</style>
+    </head>
+    
+    <body>
+        <script type="text/javascript">
+        	var testdata;
+        
+        	d3.csv("megaStudentsFa14.csv", function (d) { testdata = d; visualize()});
+
+		function visualize() {
+			//Dynamic, random dataset
+			var dataset = [];
+			var objdataset = [];
+			
+			for(var i = 0; i < testdata.length; i++)
+			{
+				if(parseFloat(testdata[i]["grade_final"]) != -1)
+				{
+					var newObject = {
+						"id" : parseFloat(testdata[i]["id"]),
+						"grade_mt1" : parseFloat(testdata[i]["grade_mt1"])/100,
+						"grade_mt2" : parseFloat(testdata[i]["grade_mt2"])/100,
+						"grade_final" : parseFloat(testdata[i]["grade_final"])/100,
+						"grade_overall" : parseFloat(testdata[i]["grade_overall"])/100,
+						"questions_pre_mt1" : parseFloat(testdata[i]["questions_pre_mt1"]),
+						"questions_mt1_to_mt2" : parseFloat(testdata[i]["questions_mt1_to_mt2"]),
+						"questions_mt2_to_final" : parseFloat(testdata[i]["questions_mt2_to_final"]),
+						"questions_total" : parseFloat(testdata[i]["questions_total"])
+					};
+					dataset.push(newObject);
+				}
+			}
+			
+			var w = 400;
+			var h = 400;
+			var padding = 20;
+			var maxGrade = d3.max(dataset, function(d) { return d["grade_overall"]; });
+			var maxQuestions = Math.max(Math.max(
+					d3.max(dataset, function(d) { return d["questions_pre_mt1"]; }),
+					d3.max(dataset, function(d) { return d["questions_mt1_to_mt2"]; })
+					),d3.max(dataset, function(d) { return d["questions_mt2_to_final"]; })
+					)
+			var pointRadius = 2;
+			
+			// Setup Scales
+			var xScale = d3.scale.linear()
+					.domain([0,1.1])
+					.clamp(true)
+					.range([padding,w-(2*padding)]);
+
+			var xAxis = d3.svg.axis()
+				.scale(xScale)
+				.orient("bottom")
+				.tickFormat(d3.format(".1%"))
+				.ticks(5);
+			
+			var yScale = d3.scale.linear()
+					.domain([0,maxQuestions])
+					.range([h-padding,padding]);
+					
+			var yAxis = d3.svg.axis()
+				.scale(yScale)
+				.orient("left")
+				.ticks(5);
+			
+			var colorScale = d3.scale.linear()
+					.domain([0, 1])
+					.rangeRound([150,255]);
+			
+			var newColorScale = d3.scale.linear()
+					.domain([0.6, 0.7, 1])
+					.clamp(true)
+					.range(["red", "yellow", "green"]);
+			
+			
+			var chart1 = d3.select("body")
+						.append("svg")
+						.attr("width", w)
+						.attr("height", h);
+			// Chart interval 1
+			chart1.selectAll("circle")
+				.data(dataset)
+				.enter()
+				.append("circle")
+				.attr("cx", function (d) {return xScale(d["grade_mt1"]);})
+				.attr("cy", function (d) {return yScale(d["questions_pre_mt1"]);})
+				.attr("r", pointRadius)
+				.attr("stroke-width","0")
+				.attr("fill", function(d) { return newColorScale(d["grade_overall"]);});
+							
+			chart1.append("g")
+				.attr("class","axis")
+				.attr("transform", "translate(0," + (h - padding) + ")")
+				.call(xAxis);
+
+			chart1.append("g")
+				.attr("class","axis")
+				.attr("transform", "translate(" + ( padding) + ",0)")
+				.call(yAxis);
+				
+			var chart2 = d3.select("body")
+						.append("svg")
+						.attr("width", w)
+						.attr("height", h);
+
+			chart2.selectAll("circle")
+				.data(dataset)
+				.enter()
+				.append("circle")
+				.attr("cx", function (d) {return xScale(d["grade_mt2"]);})
+				.attr("cy", function (d) {return yScale(d["questions_mt1_to_mt2"]);})
+				.attr("r", pointRadius)
+				.attr("stroke-width","0")
+				.attr("fill", function(d) { return newColorScale(d["grade_overall"]);});
+							
+			chart2.append("g")
+				.attr("class","axis")
+				.attr("transform", "translate(0," + (h - padding) + ")")
+				.call(xAxis);
+
+			chart2.append("g")
+				.attr("class","axis")
+				.attr("transform", "translate(" + ( padding) + ",0)")
+				.call(yAxis);
+				
+			var chart3 = d3.select("body")
+						.append("svg")
+						.attr("width", w)
+						.attr("height", h);
+
+			chart3.selectAll("circle")
+				.data(dataset)
+				.enter()
+				.append("circle")
+				.attr("cx", function (d) {return xScale(d["grade_final"]);})
+				.attr("cy", function (d) {return yScale(d["questions_mt2_to_final"]);})
+				.attr("r", pointRadius)
+				.attr("stroke-width","0")
+				.attr("fill", function(d) { return newColorScale(d["grade_overall"]);});
+							
+			chart3.append("g")
+				.attr("class","axis")
+				.attr("transform", "translate(0," + (h - padding) + ")")
+				.call(xAxis);
+
+			chart3.append("g")
+				.attr("class","axis")
+				.attr("transform", "translate(" + ( padding) + ",0)")
+				.call(yAxis);
+				
+		}
+		</script>
+    </body>
+</html>     

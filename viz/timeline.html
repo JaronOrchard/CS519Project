@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Help Queue Timeline</title>
+        <script type="text/javascript" src="d3.js"></script>
+		<style type="text/css">
+			.axis path,
+			.axis line {
+				fill: none;
+				stroke: black;
+				shape-rendering: crispEdges;
+			}
+
+			.axis text {
+				font-family: sans-serif;
+				font-size: 11px;
+			}
+			.bar rect {
+				fill: steelblue;
+				shape-rendering: crispEdges;
+			}
+
+			.bar text {
+				fill: #fff;
+			}
+			.line {
+				fill: none;
+				stroke: steelblue;
+				stroke-width: 1.5px;
+			}
+		</style>
+    </head>
+    <body>
+        <script type="text/javascript">
+        	var testdata;
+        
+        	d3.csv("queueEntriesFa14.csv", function (d) { testdata = d; visualize()});
+
+		function visualize() {
+			//Dynamic, random dataset
+			var queueData = [];
+			
+			for(var i = 0; i < testdata.length; i++)
+			{
+				var answerDate = new Date(parseFloat(testdata[i]["question_answered_time"]));
+				var askDate = new Date(parseFloat(testdata[i]["question_asked_time"]));
+				var studentID = parseFloat(testdata[i]["student_id"]);
+				var taID = parseFloat(testdata[i]["ta_id"]);
+				queueData.push(answerDate);
+			}
+			var margin = {top: 10, right: 30, bottom: 30, left: 30},
+				width = 1200 - margin.left - margin.right,
+				height = 500 - margin.top - margin.bottom;
+			var formatCount = d3.format(",.0f");
+			var lastDate = d3.max(queueData, function(d) { return d; });
+			var firstDate = d3.min(queueData, function(d) { return d; });
+//			console.log(firstDate);
+//			console.log(lastDate);
+			
+			var xScale = d3.time.scale()
+					.domain([firstDate,lastDate])
+					.range([0,width]);
+			
+			var data = d3.layout.histogram()
+					.bins(xScale.ticks(d3.time.days(firstDate,lastDate).length))(queueData);
+			
+			var yScale = d3.scale.linear()
+					.domain([0, d3.max(data, function(d) { return d.y; })])
+					.range([height,0]);
+
+			var xAxis = d3.svg.axis()
+				.scale(xScale)
+				.orient("bottom");
+
+			var yAxis = yAxis = d3.svg.axis()
+				.scale(yScale)
+				.orient("left")
+				.ticks(5);
+
+			var svg = d3.select("body").append("svg")
+				.attr("width", width + margin.left + margin.right)
+				.attr("height", height + margin.top + margin.bottom)
+				.append("g")
+				.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+			svg.append("g")
+				.attr("class", "x axis")
+				.attr("transform", "translate(0," + height + ")")
+				.call(xAxis);
+
+			svg.append("g")
+				.attr("class","axis")
+//				.attr("transform", "translate(" + ( - margin.left) + ",0)")
+				.call(yAxis);
+
+			var line = d3.svg.line()
+				.x(function(d) { return xScale(d.x); })
+				.y(function(d) { return yScale(d.y); });
+
+			svg.append("path")
+				.datum(data)
+				.attr("class", "line")
+				.attr("d", line);
+
+			}
+		</script>
+    </body>
+</html>     
