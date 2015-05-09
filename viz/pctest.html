@@ -65,7 +65,7 @@ var newColorScale = d3.scale.linear()
 		.range(["black","red", "yellow", "green"]);
 
 
-d3.csv("renameStudentsFa14.csv", function(error, students) {
+d3.csv("/Data/renameStudentsFa14.csv", function(error, students) {
 
   // Extract the list of dimensions and create a scale for each.
   x.domain(dimensions = d3.keys(students[0]).filter(function(d) {
