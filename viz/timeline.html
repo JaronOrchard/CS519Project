@@ -55,8 +55,6 @@
 			var formatCount = d3.format(",.0f");
 			var lastDate = d3.max(queueData, function(d) { return d; });
 			var firstDate = d3.min(queueData, function(d) { return d; });
-//			console.log(firstDate);
-//			console.log(lastDate);
 			
 			var xScale = d3.time.scale()
 					.domain([firstDate,lastDate])
